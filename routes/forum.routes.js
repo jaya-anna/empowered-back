@@ -3,34 +3,24 @@ const Comment = require('../models/Comment.model');
 const Post = require('../models/Post.model');
 const isAuthenticated = require('../middlewares/isAuthenticated');
 
+// POST ----- FOR POSTS
 router.post('/createpost', isAuthenticated, async(req,res) => {
     try {
+        console.log(req.body);
+        console.log(req.payload);
         const title = req.body.title;
         const content = req.body.content;
-        const author = req.user._id;
+        const author = req.payload.user;
 
         await Post.create({ title: title, content: content, author: author });
         res.status(201).json({message: "Post created successfully"});
     } catch (error) {
         console.log("Error creating a post: ", error);
         res.status(400).json({errorMessage: "Error creating a post"});
-      }
+    }
 })
 
-router.post('/createcomment', isAuthenticated, async(req,res) => {
-    try {
-        const content = req.body.content;
-        const author = req.session.user._id;
-        const postIdComment = req.params.postId;
-
-        await Comment.create({ postId: postIdComment, content: content, author: author });
-        res.status(201).json({message: "Comment created successfully"});
-    } catch (error) {
-        console.log("Error creating a Comment: ", error);
-        res.status(400).json({errorMessage: "Error creating a Comment"});
-      }
-})
-
+// GET ALL POSTS
 router.get('/posts', async (req, res) => {
     try {
         const posts = await Post.find().populate('author');
@@ -41,6 +31,7 @@ router.get('/posts', async (req, res) => {
     }
 });
 
+// GET POST BY ID
 router.get('/posts/:postId', async (req, res) => {
     try {
         const postId = req.params.postId;
@@ -57,6 +48,7 @@ router.get('/posts/:postId', async (req, res) => {
     }
 });
 
+// GET COMMENT BY POST ID
 router.get('/posts/:postId/comments', async (req, res) => {
     try {
         const postId = req.params.postId;
@@ -69,5 +61,19 @@ router.get('/posts/:postId/comments', async (req, res) => {
     }
 });
 
+// POST ------ FOR COMMENTS
+router.post('/posts/:postId/createcomment', isAuthenticated, async(req,res) => {
+    try {
+        const content = req.body.content;
+        const author = req.payload.user;
+        const postIdComment = req.params.postId;
+
+        await Comment.create({ postId: postIdComment, content: content, author: author });
+        res.status(201).json({message: "Comment created successfully"});
+    } catch (error) {
+        console.log("Error creating a Comment: ", error);
+        res.status(400).json({errorMessage: "Error creating a Comment"});
+    }
+})
 
 module.exports = router;
