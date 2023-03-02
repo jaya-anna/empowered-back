@@ -58,5 +58,47 @@ router.post('/verify', isAuthenticated, (req, res, next) => {
   }
 })
 
+
+router.post('/logout', async (req, res, next) => {
+    const username = req.body.username;
+    
+    try {
+      const foundUser = await User.find({username: username});
+      if (foundUser.length) {
+        if (bcrypt.compareSync(req.body.password, foundUser[0].passwordHash)) {
+  
+          const authToken = jwt.sign(
+            {
+              expiresIn: '6h',
+              user: foundUser[0].username, // Put the data of your user in there
+            },
+              process.env.TOKEN_SECRET,
+            {
+              algorithm: 'HS256',
+            }
+          )
+          res.status(200).json({token: authToken});
+        } else {
+          res.status(403).json('Password incorrect')
+        }
+      } else {
+        res.status(404).json('User not found')
+      }
+    } catch (error) {
+      console.log("Error finding user: ", error);
+    }
+  })
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = router
 
