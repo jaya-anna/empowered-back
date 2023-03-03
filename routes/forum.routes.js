@@ -48,6 +48,25 @@ router.get('/posts/:postId', async (req, res) => {
     }
 });
 
+// DELETE ----- POST
+router.delete('/posts/:postId', async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ errorMessage: "Post not found" });
+        }
+
+        await Post.deleteOne({ _id: postId });
+        await Comment.deleteMany({ postId: postId });
+        res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+        console.log("Error deleting post: ", error);
+        res.status(500).json({ errorMessage: "Error deleting post" });
+    }
+});
+
 // GET COMMENT BY POST ID
 router.get('/posts/:postId/comments', async (req, res) => {
     try {
@@ -75,5 +94,24 @@ router.post('/posts/:postId/createcomment', isAuthenticated, async(req,res) => {
         res.status(400).json({errorMessage: "Error creating a Comment"});
     }
 })
+
+// DELETE COMMENTS
+router.delete('/posts/:postId/comments/:commentId', isAuthenticated, async(req, res) => {
+    try {
+        const commentId = req.params.commentId;
+        const comment = await Comment.findById(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ errorMessage: "Comment not found" });
+        }
+
+        await Comment.deleteOne({ _id: commentId });
+        res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (error) {
+        console.log("Error deleting comment: ", error);
+        res.status(500).json({ errorMessage: "Error deleting comment" });
+    }
+});
+
 
 module.exports = router;
