@@ -6,8 +6,6 @@ const isAuthenticated = require('../middlewares/isAuthenticated');
 // POST ----- FOR POSTS
 router.post('/createpost', isAuthenticated, async(req,res) => {
     try {
-        console.log(req.body);
-        console.log(req.payload);
         const title = req.body.title;
         const content = req.body.content;
         const author = req.payload.user;
@@ -35,6 +33,11 @@ router.get('/posts', async (req, res) => {
 router.get('/posts/:postId', async (req, res) => {
     try {
         const postId = req.params.postId;
+
+        if (!Types.ObjectId.isValid(postId)) {
+            res.status(400).json({ message: 'Specified id is not valid' });
+            return;
+        }
     
         const post = await Post.findById(postId).populate('author');
         if (!post) {
@@ -66,6 +69,32 @@ router.delete('/posts/:postId', async (req, res) => {
         res.status(500).json({ errorMessage: "Error deleting post" });
     }
 });
+
+// UPDATE ----- POST
+router.patch('forum/posts/:postId', async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+    
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+    
+        if (post.author.toString() !== req.userId) {
+            return res.status(401).json({ error: 'You are not authorized to update this post' });
+        }
+    
+        post.title = req.body.title;
+        post.content = req.body.content;
+        await post.save();
+    
+        res.json(post);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+    
+
 
 // GET COMMENT BY POST ID
 router.get('/posts/:postId/comments', async (req, res) => {
@@ -105,7 +134,7 @@ router.delete('/posts/:postId/comments/:commentId', isAuthenticated, async(req, 
             return res.status(404).json({ errorMessage: "Comment not found" });
         }
 
-        await Comment.deleteOne({ _id: commentId });
+        await Comment.findByIdAndRemove({ _id: commentId });
         res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
         console.log("Error deleting comment: ", error);
