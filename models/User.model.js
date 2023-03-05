@@ -24,6 +24,10 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required."],
     },
+
+    posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
