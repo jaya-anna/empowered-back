@@ -113,5 +113,50 @@ router.delete('/posts/:postId/comments/:commentId', isAuthenticated, async(req, 
     }
 });
 
+// update ---- post
+router.put('/posts/:postId', async (req, res) => {
+    try {
+        const postId = req.params.postId;
+
+        if (!Types.ObjectId.isValid(postId)) {
+            res.status(400).json({ message: 'Specified id is not valid' });
+            return;
+        }
+
+        const post = await Post.findByIdAndUpdate(postId, req.body, { new: true });
+
+        if (!post) {
+            return res.status(404).json({ errorMessage: "Post not found" });
+        }
+
+        res.json(post);
+    } catch (error) {
+        console.log("Error updating post: ", error);
+        res.status(500).json({ errorMessage: "Error updating post" });
+    }
+});
+
+
+// update ---- comment
+router.put('/posts/:postId/comments/:commentId', isAuthenticated, async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+
+        if (!Types.ObjectId.isValid(postId) || !Types.ObjectId.isValid(commentId)) {
+            res.status(400).json({ message: 'Specified id is not valid' });
+            return;
+        }
+
+        const updatedComment = await Comment.findByIdAndUpdate(commentId, req.body, { new: true });
+        res.json(updatedComment);
+    } catch (error) {
+        console.log("Error updating comment: ", error);
+        res.status(500).json({ errorMessage: "Error updating comment" });
+    }
+});
+
+
+
+
 
 module.exports = router;
