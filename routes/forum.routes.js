@@ -118,10 +118,10 @@ router.put('/posts/:postId', async (req, res) => {
     try {
         const postId = req.params.postId;
 
-        if (!Types.ObjectId.isValid(postId)) {
-            res.status(400).json({ message: 'Specified id is not valid' });
-            return;
-        }
+        // if (!Types.ObjectId.isValid(postId)) {
+        //     res.status(400).json({ message: 'Specified id is not valid' });
+        //     return;
+        // }
 
         const post = await Post.findByIdAndUpdate(postId, req.body, { new: true });
 
@@ -129,7 +129,9 @@ router.put('/posts/:postId', async (req, res) => {
             return res.status(404).json({ errorMessage: "Post not found" });
         }
 
-        res.json(post);
+        const posts = await Post.find();
+
+        res.json(posts);
     } catch (error) {
         console.log("Error updating post: ", error);
         res.status(500).json({ errorMessage: "Error updating post" });
