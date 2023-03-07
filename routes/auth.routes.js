@@ -80,16 +80,18 @@ router.post("/verify", isAuthenticated, (req, res, next) => {
 });
 
 // router Update Profile
-router.put("/update", async (req, res, next) => {
-  console.log(req.body);
+router.put("/update", isAuthenticated, async (req, res) => {
+  
   const updatedUsername = req.body.username;
   const updatedEmail = req.body.email;
 
   try {
-    await User.findOneAndUpdate(
-      { id: req.params._id },
-      { username: updatedUsername, email: updatedEmail }
+    const value = await User.findByIdAndUpdate(
+       req.payload.user._id ,
+      { username: updatedUsername, email: updatedEmail }, { new: true }
+
     );
+    console.log(value)
     res.status(200).json({ message: "Profile info sucessfully updated" });
   } catch (error) {
     console.log("Error updating user information: ", error);
