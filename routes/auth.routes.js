@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User.model");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 
+//route for signup
 router.post("/signup", async (req, res, next) => {
   try {
     const username = req.body.username;
@@ -42,6 +43,7 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 
+// route for login
 router.post("/login", async (req, res, next) => {
   const username = req.body.username;
 
@@ -72,6 +74,7 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+// route for verification
 router.post("/verify", isAuthenticated, (req, res, next) => {
   if (req.payload) {
     console.log("PAYLOAD: ", req.payload);
@@ -79,41 +82,30 @@ router.post("/verify", isAuthenticated, (req, res, next) => {
   }
 });
 
-// router Update Profile
+// route for Updating Profile
 router.put("/update/:userId", isAuthenticated, async (req, res) => {
-  
-  const updatedUsername = req.body.username;
-  const updatedEmail = req.body.email;
-
   try {
-    const value = await User.findByIdAndUpdate(
-       req.payload.user._id ,
-      { username: updatedUsername, email: updatedEmail }, { new: true }
+    const updatedUsername = req.body.username;
+    const updatedEmail = req.body.email;
 
+    const value = await User.findByIdAndUpdate(
+        req.payload.user._id ,
+      { username: updatedUsername, email: updatedEmail }, { new: true }
     );
     console.log(value);
 
     const updatedUser = await User.findById(req.payload.user._id);
-
     res.status(200).json(updatedUser);
-
-
-
-    // res.status(200).json({ message: "Profile info sucessfully updated" });
   } catch (error) {
     console.log("Error updating user information: ", error);
     res.status(500).json({ errorMessage: "Error updating user information" });
   }
 });
 
-
-// router Delete Profile
-
-router.delete("/profile", async (req, res, next) => {
+// route for deleting Profile
+router.delete("/profile/:userId", async (req, res, next) => {
   try {
-    await User.findByIdAndDelete(req.user._id);
-    res.json({ message: "Profile deleted" });
-
+    await User.findByIdAndDelete(req.params.userId);
     res.status(200).json({ errorMessage: "Profile sucessfully deleted" });
   } catch (error) {
     console.log("Error deleting profile: ", error);
