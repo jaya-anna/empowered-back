@@ -80,7 +80,7 @@ router.post("/verify", isAuthenticated, (req, res, next) => {
 });
 
 // router Update Profile
-router.put("/update", isAuthenticated, async (req, res) => {
+router.put("/update/:userId", isAuthenticated, async (req, res) => {
   
   const updatedUsername = req.body.username;
   const updatedEmail = req.body.email;
@@ -91,13 +91,21 @@ router.put("/update", isAuthenticated, async (req, res) => {
       { username: updatedUsername, email: updatedEmail }, { new: true }
 
     );
-    console.log(value)
-    res.status(200).json({ message: "Profile info sucessfully updated" });
+    console.log(value);
+
+    const updatedUser = await User.findById(req.payload.user._id);
+
+    res.status(200).json(updatedUser);
+
+
+
+    // res.status(200).json({ message: "Profile info sucessfully updated" });
   } catch (error) {
     console.log("Error updating user information: ", error);
     res.status(500).json({ errorMessage: "Error updating user information" });
   }
 });
+
 
 // router Delete Profile
 
