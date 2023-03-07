@@ -118,11 +118,6 @@ router.put('/posts/:postId', async (req, res) => {
     try {
         const postId = req.params.postId;
 
-        // if (!Types.ObjectId.isValid(postId)) {
-        //     res.status(400).json({ message: 'Specified id is not valid' });
-        //     return;
-        // }
-
         const post = await Post.findByIdAndUpdate(postId, req.body, { new: true });
 
         if (!post) {
@@ -138,19 +133,15 @@ router.put('/posts/:postId', async (req, res) => {
     }
 });
 
-
 // update ---- comment
 router.put('/posts/:postId/comments/:commentId', isAuthenticated, async (req, res) => {
     try {
-        const { postId, commentId } = req.params;
-
-        if (!Types.ObjectId.isValid(postId) || !Types.ObjectId.isValid(commentId)) {
-            res.status(400).json({ message: 'Specified id is not valid' });
-            return;
-        }
+        const { commentId } = req.params;
 
         const updatedComment = await Comment.findByIdAndUpdate(commentId, req.body, { new: true });
-        res.json(updatedComment);
+
+        const comments = await Comment.find();
+        res.json(comments);
     } catch (error) {
         console.log("Error updating comment: ", error);
         res.status(500).json({ errorMessage: "Error updating comment" });
