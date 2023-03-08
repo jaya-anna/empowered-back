@@ -24,7 +24,7 @@ module.exports = (app) => {
   // controls a very specific header to pass headers from the frontend
   app.use(
     cors({
-      origin: "http://localhost:5173"
+      origin: ["https://feel-empowered.netlify.app"]
     })
   );
 
